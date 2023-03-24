@@ -25,7 +25,7 @@ def get_chatgpt_response(prompt):
 
 
 def choose_tags(options, gem_url):
-    prompt_tags = f"Choose the most relevant tags for this webpage {gem_url}. The must use only single-worded tags, abbrevations, common nouns."
+    prompt_tags = f"Choose the most relevant tags for this webpage {gem_url}. The must use only single-worded tags, abbrevations, common nouns. Use only comma separator to list the tags."
     print("ChatGPT tags prompt:", prompt_tags)
 
     # Get the response from the ChatGPT API
@@ -35,16 +35,13 @@ def choose_tags(options, gem_url):
     # Select Notion tags that were suggested by ChatGPT
     tokens = chatgpt_answer.lower().rstrip(" ,.!/").split(", ")
 
-    if not options:
-        options = []
-    options.extend([{"name": token} for token in tokens if options])
-    return options
+    return [{"name": token} for token in tokens if options]
 
 
 def choose_categories(options, gem_url):
     categories = [option["name"] for option in options]
 
-    prompt_categories = f"Choose the most relevant tags for this webpage {gem_url} from the following list: {', '.join(categories)}. You are not allowed to use any other tags."
+    prompt_categories = f"Choose the most relevant tags for this webpage {gem_url} from the following list: {', '.join(categories)}. You are not allowed to use any other tags. Use only comma separator to list the tags."
     print("ChatGPT categories prompt:", prompt_categories)
 
     # Get the response from the ChatGPT API
@@ -86,13 +83,12 @@ def describe_url(webhook):
     chosen_tags = choose_tags(tags["multi_select"]["options"], gem_url)
 
     # Create missing unique tags in the database
+    if not tags["multi_select"]["options"]:
+        tags["multi_select"]["options"] = []
+    tags["multi_select"]["options"].extend(chosen_tags)
     request_payload = {
         "properties": {
-            "Tags": {
-                "multi_select": {
-                    "options": chosen_tags
-                }
-            }
+            "Tags": tags
         }
     }
 
