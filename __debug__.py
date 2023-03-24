@@ -8,7 +8,7 @@ class MockWebhook:
         return self.json_data
 
 def main():
-    data = {'gem_url': 'https://www.shouselaw.com/ca/labor/wrongful-termination/warn-act/', 'new_page_id': '610fd5b3-78a6-4119-96a4-dcc1ed3d1f3a'}
+    data = {'gem_url': 'https://www.balancepro.org/resources/articles/five-steps-to-smart-tax-management/', 'new_page_id': 'c7a5bebc-a76c-4f26-a7ae-3c8ddddd41ea'}
     describe_url(MockWebhook(data))
 
 if __name__ == '__main__':

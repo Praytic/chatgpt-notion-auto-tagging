@@ -51,11 +51,12 @@ def describe_url(webhook):
     categories = [option["name"] for option in options]
 
     # Generate the prompt
-    prompt = f"Describe this webpage ({gem_url}) using only the following tags: {', '.join(categories)}"
+    prompt = f"Choose the most relevant tags for this webpage {gem_url} from the following list: {', '.join(categories)}. You are not allowed to use any other tags."
     print("ChatGPT prompt:", prompt)
 
     # Get the response from the ChatGPT API
     chatgpt_answer = get_chatgpt_response(prompt)
+    print("ChatGPT answer:", chatgpt_answer)
 
     # Select Notion categories that were selected by ChatGPT
     tokens = chatgpt_answer.lower().rstrip(" ,.!/").split(", ")
@@ -67,7 +68,7 @@ def describe_url(webhook):
     request_payload = { "properties": { "Category": request_payload } }
 
     # Update the Notion database with the ChatGPT answer
-    print("Notion request payload:", pick(request_payload, "properties"))
+    print("Notion request payload for updated page:", pick(request_payload, "properties"))
     notion.pages.update(
         new_page_id,
         **request_payload
