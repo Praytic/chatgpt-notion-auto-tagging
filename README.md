@@ -1,5 +1,7 @@
 # ChatGPT-Notion-Auto-Tagging
 
+<img width="945" alt="Screenshot 2023-03-23 at 11 55 42 PM" src="https://user-images.githubusercontent.com/10060411/227447609-0b3d512d-2d23-4b17-b13c-727a33ca0faa.png">
+
 Integration between [ChatGPT](https://chat.openai.com/) and [Notion](https://www.notion.so/). 
 The main idea of this repo is to enhance [Notion Clipper plugin](https://www.notion.so/web-clipper)
 with auto-tagging based on the web page summary.
