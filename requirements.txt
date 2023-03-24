@@ -1,0 +1,5 @@
+google-cloud-secret-manager==1.0.0
+google-cloud-functions==1.2.0
+notion-client==0.4.0
+requests==2.26.0
+openai==0.27.2

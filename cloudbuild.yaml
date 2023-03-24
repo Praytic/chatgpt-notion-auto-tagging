@@ -1,0 +1,15 @@
+steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - functions
+      - deploy
+      - describe-url
+      - --source=.
+      - --runtime=python310
+      - --trigger-http
+      - --allow-unauthenticated
+      - --region=us-central1
+      - --entry-point=describe_url
+      - --set-secrets=NOTION_API_KEY=notion_api_key:latest,OPENAI_API_KEY=openai_api_key:latest
+      - --memory=256MB
+      - --timeout=60s
