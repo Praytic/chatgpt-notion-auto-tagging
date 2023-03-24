@@ -2,7 +2,6 @@ import os
 
 import openai
 from notion_client import Client
-from notion_client.helpers import pick
 
 # Set up the Notion client
 notion = Client(auth=os.environ.get("NOTION_API_KEY"))
@@ -23,6 +22,40 @@ def get_chatgpt_response(prompt):
     except Exception as e:
         print(f"Error from ChatGPT: {e}")
         return None
+
+
+def choose_tags(options, gem_url):
+    prompt_tags = f"Choose the most relevant tags for this webpage {gem_url}. The must use only single-worded tags, abbrevations, common nouns."
+    print("ChatGPT tags prompt:", prompt_tags)
+
+    # Get the response from the ChatGPT API
+    chatgpt_answer = get_chatgpt_response(prompt_tags)
+    print("ChatGPT selected tags:", chatgpt_answer)
+
+    # Select Notion tags that were suggested by ChatGPT
+    tokens = chatgpt_answer.lower().rstrip(" ,.!/").split(", ")
+
+    if not options:
+        options = []
+    options.extend([{"name": token} for token in tokens if options])
+    return options
+
+
+def choose_categories(options, gem_url):
+    categories = [option["name"] for option in options]
+
+    prompt_categories = f"Choose the most relevant tags for this webpage {gem_url} from the following list: {', '.join(categories)}. You are not allowed to use any other tags."
+    print("ChatGPT categories prompt:", prompt_categories)
+
+    # Get the response from the ChatGPT API
+    chatgpt_answer = get_chatgpt_response(prompt_categories)
+    print("ChatGPT selected categories:", chatgpt_answer)
+
+    # Select Notion categories that were selected by ChatGPT
+    tokens = chatgpt_answer.lower().rstrip(" ,.!/").split(", ")
+    chat_gpt_options = [option for option in options if option["name"].lower() in tokens]
+
+    return chat_gpt_options
 
 
 def describe_url(webhook):
@@ -47,30 +80,47 @@ def describe_url(webhook):
     database = notion.databases.retrieve(database_id)
 
     category = database["properties"]["Category"]
-    options = category["multi_select"]["options"]
-    categories = [option["name"] for option in options]
+    tags = database["properties"]["Tags"]
 
-    # Generate the prompt
-    prompt = f"Choose the most relevant tags for this webpage {gem_url} from the following list: {', '.join(categories)}. You are not allowed to use any other tags."
-    print("ChatGPT prompt:", prompt)
+    chosen_categories = choose_categories(category["multi_select"]["options"], gem_url)
+    chosen_tags = choose_tags(tags["multi_select"]["options"], gem_url)
 
-    # Get the response from the ChatGPT API
-    chatgpt_answer = get_chatgpt_response(prompt)
-    print("ChatGPT answer:", chatgpt_answer)
+    # Create missing unique tags in the database
+    request_payload = {
+        "properties": {
+            "Tags": {
+                "multi_select": {
+                    "options": chosen_tags
+                }
+            }
+        }
+    }
 
-    # Select Notion categories that were selected by ChatGPT
-    tokens = chatgpt_answer.lower().rstrip(" ,.!/").split(", ")
-    chat_gpt_options = [option for option in options if option["name"].lower() in tokens]
+    print("Update Notion database with new tags:", chosen_tags)
+    notion.databases.update(
+        database["id"],
+        **request_payload
+    )
 
     # Form a PATCH request payload to update Notion page with selected categories
-    request_payload = new_page["properties"]["Category"]
-    request_payload["multi_select"] = chat_gpt_options
-    request_payload = { "properties": { "Category": request_payload } }
+    request_payload = {
+        "properties": {
+            "Category": {
+                "multi_select": chosen_categories
+            },
+            "Tags": {
+                "multi_select": chosen_tags
+            }
+        }
+    }
+    request_payload["properties"]["Category"]["multi_select"] = chosen_categories
+    request_payload["properties"]["Tags"]["multi_select"] = chosen_tags
 
     # Update the Notion database with the ChatGPT answer
-    print("Notion request payload for updated page:", pick(request_payload, "properties"))
+    print("Update Notion page with new categories:", chosen_categories)
+    print("Update Notion page with new tags:", chosen_tags)
     notion.pages.update(
-        new_page_id,
+        new_page["id"],
         **request_payload
     )
 
