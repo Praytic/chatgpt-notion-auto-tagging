@@ -1,3 +1,5 @@
+[![Google Cloud Build](https://github.com/Praytic/chatgpt-notion-auto-tagging/actions/workflows/google.yml/badge.svg?branch=main)](https://github.com/Praytic/chatgpt-notion-auto-tagging/actions/workflows/google.yml)
+
 # ChatGPT-Notion-Auto-Tagging
 
 <img width="945" alt="Screenshot 2023-03-23 at 11 55 42 PM" src="https://user-images.githubusercontent.com/10060411/227447609-0b3d512d-2d23-4b17-b13c-727a33ca0faa.png">
