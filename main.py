@@ -13,7 +13,7 @@ openai.api_key = os.environ.get("OPENAI_API_KEY")
 def get_chatgpt_response(prompt):
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4",
             max_tokens=100,
             n=1,
             messages=[{"role": "system", "content": prompt}]
